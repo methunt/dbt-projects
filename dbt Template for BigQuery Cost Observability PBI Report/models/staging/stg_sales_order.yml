@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_system_a_sales_order
+    description: '{{ doc("table_stg_sales_order") }}'
+    config: &stg_sales_order_config
+      materialized: bq_table_collation
+      meta:
+        collation:
+          - type: und:ci
+            columns: [ProductName, ProductCategory]
+        constraints:
+          - type: not_null
+            columns: [OrderID, CustomerKey, OrderDate, Quantity, UnitPrice, Amount, SourceSystem, InsertionTimestamp]
+          - type: primary_key
+            columns: [OrderKey]
+    columns: &stg_sales_order_cols
+      - name: OrderKey
+        data_type: int64
+        description: '{{ doc("order_key") }}'
+      - name: OrderID
+        data_type: int64
+        description: '{{ doc("order_id") }}'
+      - name: CustomerKey
+        data_type: int64
+        description: '{{ doc("order_customer_key") }}'
+      - name: ProductName
+        data_type: string
+        description: '{{ doc("product_name") }}'
+      - name: ProductCategory
+        data_type: string
+        description: '{{ doc("product_category") }}'
+      - name: OrderDate
+        data_type: date
+        description: '{{ doc("order_date") }}'
+      - name: Quantity
+        data_type: int64
+        description: '{{ doc("order_quantity") }}'
+      - name: UnitPrice
+        data_type: numeric
+        description: '{{ doc("order_unit_price") }}'
+      - name: Amount
+        data_type: numeric
+        description: '{{ doc("order_amount") }}'
+      - name: SourceSystem
+        data_type: string
+        description: '{{ doc("source_system") }}'
+      - name: InsertionTimestamp
+        data_type: timestamp
+        description: '{{ doc("insertion_timestamp") }}'
+
+  - name: stg_system_b_sales_order
+    description: '{{ doc("table_stg_sales_order") }}'
+    config: *stg_sales_order_config
+    columns: *stg_sales_order_cols

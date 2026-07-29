@@ -1,0 +1,21 @@
+# Every value is sourced from an env var -- nothing here can leak a real project,
+# dataset, or credential. Set these before running dbt:
+#   DBT_BQ_PROJECT     - your GCP project id (required, no default)
+#   DBT_BQ_DATASET     - a randomized dataset name you own, e.g. dual_source_demo_7f3a91
+#                        (required, no default -- never point this at a shared/prod dataset)
+#   DBT_BQ_METHOD      - auth method, defaults to 'oauth'
+#   DBT_BQ_LOCATION    - BigQuery dataset location, defaults to 'US'
+#   DBT_BQ_THREADS     - dbt thread count, defaults to '4'
+#   DBT_BQ_TIMEOUT_SEC - per-query timeout in seconds, defaults to '300'
+#   DBT_TARGET         - which output below to use, defaults to 'dev'
+dbt_template_for_bigquery_cost_observability:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      type: bigquery
+      method: "{{ env_var('DBT_BQ_METHOD', 'oauth') }}"
+      project: "{{ env_var('DBT_BQ_PROJECT') }}"
+      dataset: "{{ env_var('DBT_BQ_DATASET') }}"
+      location: "{{ env_var('DBT_BQ_LOCATION', 'US') }}"
+      threads: "{{ env_var('DBT_BQ_THREADS', '4') | int }}"
+      timeout_seconds: "{{ env_var('DBT_BQ_TIMEOUT_SEC', '300') | int }}"

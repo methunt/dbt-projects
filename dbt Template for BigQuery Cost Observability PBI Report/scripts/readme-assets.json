@@ -1,0 +1,40 @@
+{
+  "out_dir": "assets",
+  "facts_from": "scripts/readme-facts.json",
+
+  "hero": {
+    "name": "hero",
+    "title": "dbt Template for BigQuery Cost Observability",
+    "subtitle": "A runnable dbt (BigQuery) reference project built to feed the Bigquery & Dbt Cost Observability Power BI project.",
+    "tiles": [
+      { "value": "{dbtmeta_objects}", "label": "dbtmeta_* objects via dbt_artifacts", "colour": "primary" },
+      { "value": "{models_total}",    "label": "models instrumented, seed to fact", "colour": "cyan" },
+      { "value": "{sources_count}",   "label": "source systems merged, for realistic lineage", "colour": "violet" }
+    ],
+    "badges": ["dbt", "BigQuery", "dbt_artifacts", "Power BI companion"]
+  },
+
+  "banners": [
+    {
+      "name": "section-companion",
+      "eyebrow": "Companion",
+      "title": "Bigquery & Dbt Cost Observability",
+      "body": "What this repo is for — a runnable dbt project to point that Power BI project at.",
+      "accent": "violet"
+    },
+    {
+      "name": "section-patterns",
+      "eyebrow": "Core",
+      "title": "What it instruments",
+      "body": "Contracts, incremental facts, snapshots, a custom materialization — the run behaviour worth observing.",
+      "accent": "primary"
+    },
+    {
+      "name": "section-run",
+      "eyebrow": "Run it",
+      "title": "Seed, snapshot, build",
+      "body": "No warehouse tables required to start — seeds stand in for both systems.",
+      "accent": "good"
+    }
+  ]
+}

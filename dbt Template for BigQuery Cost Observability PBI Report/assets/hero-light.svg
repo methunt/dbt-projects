@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 382"
+     width="1200" height="382" role="img" aria-label="dbt Template for BigQuery Cost Observability">
+  <style>
+    /* Entrance animations move things but never fade them. A renderer that does
+       not run CSS - GitHub's mobile app, an email digest, a PDF export - would
+       otherwise show an empty banner, because the from-state of a fade is
+       invisible and fill-mode `both` holds it for the whole delay. Every element
+       here is fully legible with the animation stripped out. */
+    .rise  { animation: rise .55s cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes rise { from { transform: translateY(9px) } to { transform: translateY(0) } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important } }
+    .sweep { animation: sweep .9s cubic-bezier(.2,.7,.3,1) .15s; }
+    .blob  { animation: drift 14s ease-in-out infinite alternate; }
+    @keyframes sweep { from { width: 0 } to { width: 1120px } }
+    @keyframes drift { from { transform: translate(0,0) }
+                        to   { transform: translate(64px,-22px) } }
+  </style>
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2563EB" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Deliberately no background rect. GitHub has four surfaces - white,
+       light-high-contrast, dark #0D1117 and dark dimmed #22272E - and any colour
+       painted here is wrong on at least one of them. A transparent canvas is
+       right on all four; the tiles and badges supply the structure a card
+       would have. -->
+  <g class="blob"><circle cx="1010" cy="70" r="240" fill="url(#g)"/></g>
+  <text class="rise" x="40" y="92" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="44" font-weight="800"
+        fill="#1F2328" letter-spacing="-1">dbt Template for BigQuery Cost Observability</text>
+  <rect class="sweep" x="40" y="116" width="1120" height="2"
+        rx="1" fill="#D0D7DE"/>
+  <text class="rise" style="animation-delay:0.20s" x="40" y="148"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19.5" fill="#656D76">A runnable dbt (BigQuery) reference project built to feed the Bigquery &amp; Dbt Cost Observability Power BI</text>
+  <text class="rise" style="animation-delay:0.25s" x="40" y="176"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19.5" fill="#656D76">project.</text>
+  <g class="rise" style="animation-delay:0.35s">
+    <rect x="40" y="206" width="362" height="100" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+    <rect x="40" y="206" width="4" height="100" rx="2" fill="#2563EB"/>
+    <text x="62" y="256" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="35" font-weight="700"
+          fill="#1F2328" letter-spacing="-0.5">34</text>
+    <text x="62" y="284" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16.5"
+          fill="#656D76">dbtmeta_* objects via dbt_artifacts</text>
+  </g>
+  <g class="rise" style="animation-delay:0.46s">
+    <rect x="418" y="206" width="362" height="100" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+    <rect x="418" y="206" width="4" height="100" rx="2" fill="#0891B2"/>
+    <text x="440" y="256" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="35" font-weight="700"
+          fill="#1F2328" letter-spacing="-0.5">9</text>
+    <text x="440" y="284" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16.5"
+          fill="#656D76">models instrumented, seed to fact</text>
+  </g>
+  <g class="rise" style="animation-delay:0.57s">
+    <rect x="796" y="206" width="362" height="100" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+    <rect x="796" y="206" width="4" height="100" rx="2" fill="#7C3AED"/>
+    <text x="818" y="256" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="35" font-weight="700"
+          fill="#1F2328" letter-spacing="-0.5">2</text>
+    <text x="818" y="284" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16.5"
+          fill="#656D76">source systems merged, for realistic lineage</text>
+  </g>
+  <g class="rise" style="animation-delay:0.85s">
+    <rect x="40" y="328" width="49" height="32" rx="16"
+          fill="#EEF1F5" stroke="#D0D7DE"/>
+    <text x="65" y="349" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#656D76">dbt</text>
+  </g>
+  <g class="rise" style="animation-delay:0.92s">
+    <rect x="99" y="328" width="91" height="32" rx="16"
+          fill="#EEF1F5" stroke="#D0D7DE"/>
+    <text x="145" y="349" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#656D76">BigQuery</text>
+  </g>
+  <g class="rise" style="animation-delay:0.99s">
+    <rect x="200" y="328" width="133" height="32" rx="16"
+          fill="#EEF1F5" stroke="#D0D7DE"/>
+    <text x="267" y="349" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#656D76">dbt_artifacts</text>
+  </g>
+  <g class="rise" style="animation-delay:1.06s">
+    <rect x="344" y="328" width="175" height="32" rx="16"
+          fill="#EEF1F5" stroke="#D0D7DE"/>
+    <text x="431" y="349" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#656D76">Power BI companion</text>
+  </g>
+</svg>
