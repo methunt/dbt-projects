@@ -1,0 +1,199 @@
+name: 'dbt_template_for_bigquery_cost_observability'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dbt_template_for_bigquery_cost_observability'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+snapshot-paths: ["snapshots"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # Which source wins when the same natural key is present in both systems.
+  # Mirrored in macros/union_source_dim.sql -- change both together.
+  preferred_source_system: 'SYSTEM_B'
+
+  # dbt_artifacts package (run/build metadata mart) -- this is the table set the
+  # companion BigQuery & dbt Cost Observability Power BI project reads from.
+  # Gates the on-run-end upload hook below. Keep false until the metadata tables
+  # exist (see the bootstrap sequence near the on-run-end hook), then flip to true.
+  enable_dbt_artifacts: false
+  # Drops the all_results JSON blob. Recommended on BigQuery: the hook emits one
+  # INSERT ... VALUES per table and BigQuery caps SQL text at 1 MB.
+  dbt_artifacts_exclude_all_results: true
+
+models:
+  dbt_template_for_bigquery_cost_observability:
+    +contract:
+      enforced: true
+    +persist_docs:
+      relation: true
+      columns: true
+    staging:
+      +materialized: table
+      +tags: ['staging']
+    warehouse:
+      +materialized: view
+      +tags: ['warehouse']
+    analytics:
+      +materialized: table
+      +tags: ['analytics']
+
+  # ---------------------------------------------------------------------------------------------
+  # dbt_artifacts (brooklyn-data) -- run/build metadata mart the Power BI cost-observability
+  # project reads from. 34 objects:
+  #   sources/  = 11 incremental TABLES (the on-run-end hook INSERTs into these; full_refresh off)
+  #   staging/  = 11 views
+  #   root      = 12 mart views (7 dim_dbt__*, 5 fct_dbt__*)
+  # Aliases are declared explicitly per model (not via a generate_alias_name override, which would
+  # sit in the identity path of every model in this project). The package's upload hook resolves
+  # its INSERT target by node NAME and builds the relation from node ALIAS, so aliasing is honoured
+  # end-to-end. Do NOT set +materialized, +contract or +persist_docs here: the package pins its own,
+  # and the project-level contract enforcement above is namespaced to this project's own name, so
+  # it does not leak into the package.
+  # ---------------------------------------------------------------------------------------------
+  dbt_artifacts:
+    +tags: ['dbt_meta']
+
+    # -- mart views -----------------------------------------------------------------------------
+    dim_dbt__models:
+      +alias: dbtmeta_dim_dbt__models
+    dim_dbt__current_models:
+      +alias: dbtmeta_dim_dbt__current_models
+    dim_dbt__tests:
+      +alias: dbtmeta_dim_dbt__tests
+    dim_dbt__snapshots:
+      +alias: dbtmeta_dim_dbt__snapshots
+    # seeds/sources/exposures view chains are disabled -- see the note above the sources: block.
+    # Re-enable by deleting the +enabled line (the alias is retained so it round-trips cleanly).
+    dim_dbt__seeds:
+      +alias: dbtmeta_dim_dbt__seeds
+      +enabled: false   # this project's seeds ARE used (they stand in for sources), but the
+                         # cost-observability project doesn't track seed cost yet -- disabled to
+                         # match; a future update to that project could turn this back on
+    dim_dbt__sources:
+      +alias: dbtmeta_dim_dbt__sources
+      +enabled: false   # source DECLARATIONS, not freshness -- not used here (no source() calls)
+    dim_dbt__exposures:
+      +alias: dbtmeta_dim_dbt__exposures
+      +enabled: false   # always empty -- no exposures in this project
+    fct_dbt__invocations:
+      +alias: dbtmeta_fct_dbt__invocations
+    fct_dbt__model_executions:
+      +alias: dbtmeta_fct_dbt__model_executions
+    fct_dbt__test_executions:
+      +alias: dbtmeta_fct_dbt__test_executions
+    fct_dbt__snapshot_executions:
+      +alias: dbtmeta_fct_dbt__snapshot_executions
+    fct_dbt__seed_executions:
+      +alias: dbtmeta_fct_dbt__seed_executions
+
+    # -- staging views --------------------------------------------------------------------------
+    staging:
+      stg_dbt__invocations:
+        +alias: dbtmeta_stg_dbt__invocations
+      stg_dbt__models:
+        +alias: dbtmeta_stg_dbt__models
+      stg_dbt__model_executions:
+        +alias: dbtmeta_stg_dbt__model_executions
+      stg_dbt__tests:
+        +alias: dbtmeta_stg_dbt__tests
+      stg_dbt__test_executions:
+        +alias: dbtmeta_stg_dbt__test_executions
+      stg_dbt__snapshots:
+        +alias: dbtmeta_stg_dbt__snapshots
+      stg_dbt__snapshot_executions:
+        +alias: dbtmeta_stg_dbt__snapshot_executions
+      stg_dbt__seeds:
+        +alias: dbtmeta_stg_dbt__seeds
+        +enabled: false
+      stg_dbt__seed_executions:
+        +alias: dbtmeta_stg_dbt__seed_executions
+      stg_dbt__sources:
+        +alias: dbtmeta_stg_dbt__sources
+        +enabled: false
+      stg_dbt__exposures:
+        +alias: dbtmeta_stg_dbt__exposures
+        +enabled: false
+
+    # -- source tables (physical storage the hook writes into) ----------------------------------
+    # These 11 CANNOT be disabled. They are not dbt `sources:` and have nothing to do with
+    # freshness -- each is a `SELECT ... WHERE false` scaffold that creates the table the
+    # on-run-end hook INSERTs into. upload_results loops a HARDCODED dataset list and resolves
+    # each relation via graph lookup with no enabled/existence check, so disabling any one of them
+    # (even `seeds` or `exposures`, which stay permanently empty here) makes the hook fail and
+    # therefore fails the whole invocation. Only the stg_/dim_ VIEWS above can be disabled.
+    #
+    # The package sets +full_refresh: false on these (so `dbt build --full-refresh` never drops
+    # run history) but sets no on_schema_change, which defaults to `ignore`. append_new_columns
+    # lets a package upgrade that adds a column actually propagate instead of failing the hook's
+    # explicit-column INSERT on the next run.
+    sources:
+      +on_schema_change: append_new_columns
+      invocations:
+        +alias: dbtmeta_invocations
+      models:
+        +alias: dbtmeta_models
+      model_executions:
+        +alias: dbtmeta_model_executions
+      tests:
+        +alias: dbtmeta_tests
+      test_executions:
+        +alias: dbtmeta_test_executions
+      snapshots:
+        +alias: dbtmeta_snapshots
+      snapshot_executions:
+        +alias: dbtmeta_snapshot_executions
+      seeds:
+        +alias: dbtmeta_seeds
+      seed_executions:
+        +alias: dbtmeta_seed_executions
+      sources:
+        +alias: dbtmeta_sources
+      exposures:
+        +alias: dbtmeta_exposures
+
+snapshots:
+  dbt_template_for_bigquery_cost_observability:
+    +persist_docs:
+      relation: true
+      columns: true
+
+seeds:
+  dbt_template_for_bigquery_cost_observability:
+    +column_types:
+      customer_id: int64
+      order_id: int64
+      quantity: int64
+      unit_price: numeric
+
+# Uploads dbt run/build metadata into the dbtmeta_* tables (dbt_artifacts package) --
+# this is the source data for the Bigquery & Dbt Cost Observability Power BI project.
+# Gated on a var rather than target.name, because the gate must stay OFF for the first
+# bootstrap run: the hook INSERTs into tables that don't exist until
+# `dbt run --select dbt_artifacts` has created them.
+#
+# Bootstrap, once per target dataset:
+#   1. dbt deps
+#   2. dbt run --select dbt_artifacts                    (creates all 34 dbtmeta_* objects)
+#   3. dbt build --vars '{enable_dbt_artifacts: true}'   (first run that actually logs)
+#   4. flip enable_dbt_artifacts to true above
+# Repeat steps 1-2 after every package upgrade: the source tables are full_refresh: false, so
+# a minor release that adds columns will otherwise break the hook's explicit-column INSERT.
+on-run-end:
+  - "{% if var('enable_dbt_artifacts', false) %}{{ dbt_artifacts.upload_results(results) }}{% endif %}"
+
+# Attaches query_comment(node)'s JSON as both the SQL comment and (job-label: true) BigQuery
+# job labels on every query this project submits -- see macros/query_comment.sql for why it
+# deliberately carries no run id, and why that's still enough for the Power BI project to join
+# a job back to its run via BigQuery's own dbt_invocation_id label.
+query-comment:
+  comment: "{{ query_comment(node) }}"
+  job-label: true

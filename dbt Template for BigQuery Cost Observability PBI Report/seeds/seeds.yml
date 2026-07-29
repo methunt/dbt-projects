@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: system_a_customer
+    description: Synthetic customer export from system A, used as a stand-in for a real source.
+  - name: system_b_customer
+    description: Synthetic customer export from system B, used as a stand-in for a real source.
+  - name: system_a_sales_order
+    description: Synthetic sales-order export from system A, used as a stand-in for a real source.
+  - name: system_b_sales_order
+    description: Synthetic sales-order export from system B, used as a stand-in for a real source.

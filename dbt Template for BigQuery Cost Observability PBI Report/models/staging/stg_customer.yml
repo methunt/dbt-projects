@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_system_a_customer
+    description: '{{ doc("table_stg_customer") }}'
+    config: &stg_customer_config
+      materialized: bq_table_collation
+      meta:
+        collation:
+          - type: und:ci
+            columns: [CustomerName, Email]
+        constraints:
+          - type: not_null
+            columns: [CustomerID, Country, SignupDate, SourceSystem, InsertionTimestamp]
+          - type: primary_key
+            columns: [CustomerKey]
+    columns: &stg_customer_cols
+      - name: CustomerKey
+        data_type: int64
+        description: '{{ doc("customer_key") }}'
+      - name: CustomerID
+        data_type: int64
+        description: '{{ doc("customer_id") }}'
+      - name: CustomerName
+        data_type: string
+        description: '{{ doc("customer_name") }}'
+      - name: Email
+        data_type: string
+        description: '{{ doc("customer_email") }}'
+      - name: Country
+        data_type: string
+        description: '{{ doc("customer_country") }}'
+      - name: SignupDate
+        data_type: date
+        description: '{{ doc("customer_signup_date") }}'
+      - name: SourceSystem
+        data_type: string
+        description: '{{ doc("source_system") }}'
+      - name: InsertionTimestamp
+        data_type: timestamp
+        description: '{{ doc("insertion_timestamp") }}'
+
+  - name: stg_system_b_customer
+    description: '{{ doc("table_stg_customer") }}'
+    config: *stg_customer_config
+    columns: *stg_customer_cols

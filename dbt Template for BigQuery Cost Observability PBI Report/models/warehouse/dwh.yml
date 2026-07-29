@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: dwh_customer
+    description: '{{ doc("table_dwh_customer") }}'
+    columns:
+      - name: CustomerKey
+        data_type: int64
+        description: '{{ doc("customer_key") }}'
+        data_tests: [unique, not_null]
+      - name: CustomerID
+        data_type: int64
+        description: '{{ doc("customer_id") }}'
+      - name: CustomerName
+        data_type: string
+        description: '{{ doc("customer_name") }}'
+      - name: Email
+        data_type: string
+        description: '{{ doc("customer_email") }}'
+      - name: Country
+        data_type: string
+        description: '{{ doc("customer_country") }}'
+      - name: SignupDate
+        data_type: date
+        description: '{{ doc("customer_signup_date") }}'
+      - name: SourceSystem
+        data_type: string
+        description: '{{ doc("source_system") }}'
+      - name: InsertionTimestamp
+        data_type: timestamp
+        description: '{{ doc("insertion_timestamp") }}'
+
+  - name: dwh_sales_order
+    description: '{{ doc("table_dwh_sales_order") }}'
+    columns:
+      - name: OrderKey
+        data_type: int64
+        description: '{{ doc("order_key") }}'
+      - name: OrderID
+        data_type: int64
+        description: '{{ doc("order_id") }}'
+      - name: CustomerKey
+        data_type: int64
+        description: '{{ doc("order_customer_key") }}'
+      - name: ProductName
+        data_type: string
+        description: '{{ doc("product_name") }}'
+      - name: ProductCategory
+        data_type: string
+        description: '{{ doc("product_category") }}'
+      - name: OrderDate
+        data_type: date
+        description: '{{ doc("order_date") }}'
+      - name: Quantity
+        data_type: int64
+        description: '{{ doc("order_quantity") }}'
+      - name: UnitPrice
+        data_type: numeric
+        description: '{{ doc("order_unit_price") }}'
+      - name: Amount
+        data_type: numeric
+        description: '{{ doc("order_amount") }}'
+      - name: SourceSystem
+        data_type: string
+        description: '{{ doc("source_system") }}'

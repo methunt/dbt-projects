@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: '{{ doc("table_dim_customer") }}'
+    config:
+      materialized: bq_table_collation
+      meta:
+        collation:
+          - type: und:ci
+            columns: [CustomerName, Email]
+        constraints:
+          - type: not_null
+            columns: [CustomerID, Country, SignupDate, InsertionTimestamp]
+          - type: primary_key
+            columns: [CustomerKey]
+    columns:
+      - name: CustomerKey
+        data_type: int64
+        description: '{{ doc("customer_key") }}'
+      - name: CustomerID
+        data_type: int64
+        description: '{{ doc("customer_id") }}'
+      - name: CustomerName
+        data_type: string
+        description: '{{ doc("customer_name") }}'
+      - name: Email
+        data_type: string
+        description: '{{ doc("customer_email") }}'
+      - name: Country
+        data_type: string
+        description: '{{ doc("customer_country") }}'
+      - name: SignupDate
+        data_type: date
+        description: '{{ doc("customer_signup_date") }}'
+      - name: SourceSystem
+        data_type: string
+        description: '{{ doc("source_system") }}'
+      - name: InsertionTimestamp
+        data_type: timestamp
+        description: '{{ doc("insertion_timestamp") }}'

@@ -1,0 +1,11 @@
+customer_id,customer_name,email,country,signup_date
+104,Dev Patel,dev.patel@example.com,India,2023-03-01
+105,Elena Rossi,elena.rossi@example.com,Italy,2023-03-15
+106,Farid Haidari,farid.haidari.updated@example.com,Germany,2023-04-02
+107,Grace Kim,grace.kim@example.com,South Korea,2023-04-18
+113,Mia Alvarez,mia.alvarez@example.com,Spain,2023-08-01
+114,Noah Fischer,noah.fischer@example.com,Austria,2023-08-19
+115,Olivia Zhang,olivia.zhang@example.com,Singapore,2023-09-06
+116,Paulo Costa,paulo.costa@example.com,Brazil,2023-09-24
+117,Quinn Baker,quinn.baker@example.com,Canada,2023-10-11
+118,Rina Suzuki,rina.suzuki@example.com,Japan,2023-10-30
