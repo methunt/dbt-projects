@@ -13,6 +13,8 @@
 
 Two dbt projects for BigQuery, both about the same thing: **not paying for work that didn't need doing.** One exists to be measured — a reference project instrumented so a dashboard can show what every model, test and hook actually cost. The other stops dbt rewriting rows that never changed in the first place.
 
+Each project lives in its own repo now — this page is the index. Click through for the full README, source, and history of each.
+
 | | | |
 |---|---|---|
 | 🧱 | **[dbt Template for BigQuery Cost Observability](#-template)** | A runnable dbt project with contracts, incremental merges, a snapshot and a custom materialization. **Runs on seeds** — needs a BigQuery project, no source tables. |
@@ -28,7 +30,7 @@ Two dbt projects for BigQuery, both about the same thing: **not paying for work 
 
 A cost dashboard is only as interesting as the dbt project underneath it. This one exists to give it something worth graphing — deliberately small, but with the patterns that actually behave differently on a run: a snapshot, an incremental fact that repairs itself, a custom materialization, enforced contracts.
 
-It's the other half of **[BigQuery + dbt Cost Observability](https://github.com/methunt/PowerBi/tree/main/Bigquery%20%26%20Dbt%20Cost%20Observability)** — that repo holds the Power BI report, this one holds the dbt project it reads.
+It's the other half of **[BigQuery + dbt Cost Observability](https://github.com/methunt/pbi-bigquery-dbt-cost-observability)** — that repo holds the Power BI report, this one holds the dbt project it reads.
 
 | | | |
 |---|---|---|
@@ -36,7 +38,7 @@ It's the other half of **[BigQuery + dbt Cost Observability](https://github.com/
 | 🏷️ | **Job labels reach where metadata can't** | every query is stamped with `app`/`project`/`env`/`resource_type`/`model_name` — including jobs issued from inside a post-hook, which aren't dbt nodes and so appear in no `dbt_artifacts` table at all |
 | 🌱 | **No source tables required** | `seeds/` stands in for two upstream systems, so `dbt seed && dbt build` produces observable rows immediately — the only thing you must supply is a BigQuery project |
 
-**[Read the full README →](dbt%20Template%20for%20BigQuery%20Cost%20Observability%20PBI%20Report/README.md)** — the three feeds the Power BI model expects and where each is wired up, the bootstrap sequence, every instrumented pattern, and the gotchas. Architecture in **[architecture.md](dbt%20Template%20for%20BigQuery%20Cost%20Observability%20PBI%20Report/architecture.md)**.
+**[Open the repo →](https://github.com/methunt/dbt-bigquery-cost-observability-template)** — the three feeds the Power BI model expects and where each is wired up, the bootstrap sequence, every instrumented pattern, and the gotchas.
 
 ---
 
@@ -54,7 +56,7 @@ Run an incremental `merge` model daily and dbt's generated `MERGE` rewrites **ev
 | 🔤 | **`bq_column_collation`** | overrides `bigquery__get_table_columns_and_constraints` to splice `STRING COLLATE 'und:ci'` into the generated DDL, so a filter, join or `ORDER BY` matches regardless of case with no function call on either side |
 | 🔒 | **Opt-in, and honest about its limits** | both default to off, so every existing model keeps working unchanged — and the README is explicit that this is SCD Type 1, BigQuery-only, and that a collation change needs `--full-refresh` to take effect |
 
-**[Read the full README →](dbt%20Custom%20Macros/README.md)** — both config contracts, what you get, and the seven things worth knowing before you use them.
+**[Open the repo →](https://github.com/methunt/dbt-custom-macros)** — both config contracts, what you get, and the seven things worth knowing before you use them.
 
 ---
 
@@ -62,18 +64,16 @@ Run an incremental `merge` model daily and dbt's generated `MERGE` rewrites **ev
 
 Everything below is reference — read it when you need it.
 
-### 📁 Repo layout
+### 📁 Repo index
 
-```
-Data-Engineering/
-├─ dbt Template for BigQuery Cost Observability PBI Report/
-│                        models, macros, seeds, snapshots, tests, architecture.md
-├─ dbt Custom Macros/    two standalone adapter overrides
-├─ scripts/              this page's SVG generator and its spec
-└─ assets/               this page's light/dark SVGs
-```
+This repo is the index only — each project moved to its own repo, listed below.
 
-Both project folders are self-contained: their own README, their own assets, no shared code. Both names contain spaces, so **quote the path** in any command you run against them.
+| Repo | Contents |
+|---|---|
+| [dbt-bigquery-cost-observability-template](https://github.com/methunt/dbt-bigquery-cost-observability-template) | models, macros, seeds, snapshots, tests, architecture.md |
+| [dbt-custom-macros](https://github.com/methunt/dbt-custom-macros) | two standalone adapter overrides |
+
+This repo (`dbt-projects`) keeps only `scripts/` and `assets/` for generating this page's hero/section images.
 
 ### 📄 Licence
 
