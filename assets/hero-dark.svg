@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 260"
+     width="1200" height="260" role="img" aria-label="dbt on BigQuery, and what it costs to run">
+  <style>
+    /* Entrance animations move things but never fade them. A renderer that does
+       not run CSS - GitHub's mobile app, an email digest, a PDF export - would
+       otherwise show an empty banner, because the from-state of a fade is
+       invisible and fill-mode `both` holds it for the whole delay. Every element
+       here is fully legible with the animation stripped out. */
+    .rise  { animation: rise .55s cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes rise { from { transform: translateY(9px) } to { transform: translateY(0) } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important } }
+    .sweep { animation: sweep .9s cubic-bezier(.2,.7,.3,1) .15s; }
+    .blob  { animation: drift 14s ease-in-out infinite alternate; }
+    @keyframes sweep { from { width: 0 } to { width: 1120px } }
+    @keyframes drift { from { transform: translate(0,0) }
+                        to   { transform: translate(64px,-22px) } }
+  </style>
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Deliberately no background rect. GitHub has four surfaces - white,
+       light-high-contrast, dark #0D1117 and dark dimmed #22272E - and any colour
+       painted here is wrong on at least one of them. A transparent canvas is
+       right on all four; the tiles and badges supply the structure a card
+       would have. -->
+  <g class="blob"><circle cx="1010" cy="70" r="240" fill="url(#g)"/></g>
+  <text class="rise" x="40" y="92" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="44" font-weight="800"
+        fill="#E6EDF3" letter-spacing="-1">dbt on BigQuery, and what it costs to run</text>
+  <rect class="sweep" x="40" y="116" width="1120" height="2"
+        rx="1" fill="#30363D"/>
+  <text class="rise" style="animation-delay:0.20s" x="40" y="148"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19.5" fill="#8B949E">A runnable reference project built to be measured, and two adapter overrides for gaps dbt has no config flag</text>
+  <text class="rise" style="animation-delay:0.25s" x="40" y="176"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19.5" fill="#8B949E">for.</text>
+  <g class="rise" style="animation-delay:0.85s">
+    <rect x="40" y="206" width="125" height="32" rx="16"
+          fill="#1C2128" stroke="#30363D"/>
+    <text x="102" y="227" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#8B949E">dbt  ·  1.11</text>
+  </g>
+  <g class="rise" style="animation-delay:0.92s">
+    <rect x="175" y="206" width="91" height="32" rx="16"
+          fill="#1C2128" stroke="#30363D"/>
+    <text x="220" y="227" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#8B949E">BigQuery</text>
+  </g>
+  <g class="rise" style="animation-delay:0.99s">
+    <rect x="276" y="206" width="133" height="32" rx="16"
+          fill="#1C2128" stroke="#30363D"/>
+    <text x="343" y="227" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#8B949E">dbt_artifacts</text>
+  </g>
+  <g class="rise" style="animation-delay:1.06s">
+    <rect x="419" y="206" width="175" height="32" rx="16"
+          fill="#1C2128" stroke="#30363D"/>
+    <text x="507" y="227" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#8B949E">SCD2  ·  snapshots</text>
+  </g>
+  <g class="rise" style="animation-delay:1.13s">
+    <rect x="604" y="206" width="49" height="32" rx="16"
+          fill="#1C2128" stroke="#30363D"/>
+    <text x="629" y="227" text-anchor="middle"
+          font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15.5" fill="#8B949E">MIT</text>
+  </g>
+</svg>

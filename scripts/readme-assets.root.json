@@ -1,0 +1,29 @@
+{
+  "_comment": "Root landing page for the Data-Engineering repo. An index, not a dashboard: it quotes no figures and reads no facts file, because each project's own README carries its numbers next to the evidence for them. build_readme_assets.py here is a copy of the one in the PowerBi repo, and the dbt template subfolder has its own older copy - all three are independent on purpose, since a shared generator would couple repos that have no other reason to move together.",
+
+  "out_dir": "../assets",
+
+  "hero": {
+    "name": "hero",
+    "title": "dbt on BigQuery, and what it costs to run",
+    "subtitle": "A runnable reference project built to be measured, and two adapter overrides for gaps dbt has no config flag for.",
+    "badges": ["dbt  ·  1.11", "BigQuery", "dbt_artifacts", "SCD2  ·  snapshots", "MIT"]
+  },
+
+  "banners": [
+    {
+      "name": "section-template",
+      "eyebrow": "Project 1",
+      "title": "dbt Template for BigQuery Cost Observability",
+      "body": "A dbt project with contracts, incremental merges, a snapshot and a custom materialization - built small enough to run on seeds, so the companion Power BI report has something real to observe.",
+      "accent": "primary"
+    },
+    {
+      "name": "section-macros",
+      "eyebrow": "Project 2",
+      "title": "dbt Custom Macros for BigQuery",
+      "body": "A MERGE that skips rows where nothing actually changed, and native COLLATE on a column so case-insensitive filters stop wrapping every row in UPPER(). Opt in per model, nothing changes for models that do not.",
+      "accent": "violet"
+    }
+  ]
+}
