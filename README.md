@@ -67,12 +67,12 @@ Everything below is reference — read it when you need it.
 
 ### 📁 Repo index
 
-This repo is the index only — each project moved to its own repo.
+This repo is the index only — each project moved to its own repo, listed below.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/manifest-dark.svg">
-  <img alt="Companion repos: model dbt-bigquery-cost-observability-template, the runnable cost-observability reference project; macro dbt-custom-macros, two adapter overrides for gaps dbt has no config flag for." src="assets/manifest-light.svg">
-</picture>
+| Repo | Contents |
+|---|---|
+| [dbt-bigquery-cost-observability-template](https://github.com/methunt/dbt-bigquery-cost-observability-template) | models, macros, seeds, snapshots, tests, architecture.md |
+| [dbt-custom-macros](https://github.com/methunt/dbt-custom-macros) | two standalone adapter overrides |
 
 This repo (`dbt-projects`) keeps only `scripts/` and `assets/` for generating this page's hero/section images.
 

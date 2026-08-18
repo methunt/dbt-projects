@@ -471,70 +471,6 @@ def cast(spec: dict, facts: dict) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# Companion-repo manifest - a styled directory listing, NOT a captured
-# command. Bespoke to this repo (a repo-index hub, not a runnable project),
-# so it lives here rather than in the shared skill script.
-# --------------------------------------------------------------------------- #
-
-def manifest(spec: dict, facts: dict) -> str:
-    """A dbt-flavoured directory listing of the companion repos.
-
-    Deliberately NOT built on cast() and deliberately carries no `$ command`
-    prompt line: cast() exists for a real captured run, and dressing a
-    fabricated `dbt list` invocation up as terminal output would be exactly
-    the mock-up-as-evidence the skill's cast() rule forbids. This is honestly
-    labelled as what it is - a styled index - monospace and dbt-flavoured
-    because the subject is a CLI tool, not because it pretends to be one.
-    """
-    rows_in = spec.get("rows", [])
-    if not rows_in:
-        sys.exit(f"error: manifest {spec.get('name')!r} has no rows")
-
-    pad, row_h = 30, 60
-    top = 76
-    height = top + len(rows_in) * row_h + 22
-
-    type_w = 92
-    rows = []
-    for i, r in enumerate(rows_in):
-        col = accent(r.get("colour", "primary"), f"manifest row {i + 1}")
-        y = top + i * row_h
-        rtype = esc(fill(r["type"], facts))
-        name = esc(fill(r["name"], facts))
-        desc = esc(fill(r.get("desc", ""), facts))
-        rows.append(f"""
-  <g class="ln" style="animation-delay:{min(0.06 * i, 0.6):.2f}s">
-    <rect x="{pad}" y="{y}" width="{type_w}" height="26" rx="4" fill="{col}" fill-opacity="0.14"/>
-    <text x="{pad + type_w / 2:.0f}" y="{y + 18}" text-anchor="middle" font-family="__MONO__"
-          font-size="16" font-weight="700" fill="{col}">{rtype}</text>
-    <text x="{pad + type_w + 18}" y="{y + 18}" font-family="__MONO__" font-size="17"
-          font-weight="700" fill="__TEXT__">{name}</text>
-    <text x="{pad + type_w + 18}" y="{y + 40}" font-family="__FONT__" font-size="15.5"
-          fill="__MUTED__">{desc}</text>
-  </g>""")
-
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}"
-     width="1200" height="{height}" role="img" aria-label="{esc_attr(spec.get('label', 'Companion repos'))}">
-  <style>
-    .ln {{ animation: rise .45s cubic-bezier(.2,.7,.3,1) both; }}
-    @keyframes rise {{ from {{ transform: translateY(8px) }} to {{ transform: translateY(0) }} }}
-    @media (prefers-reduced-motion: reduce) {{ .ln {{ animation: none }} }}
-  </style>
-  <rect width="1200" height="{height}" rx="12" fill="__CARD__"/>
-  <rect x="0.5" y="0.5" width="1199" height="{height - 1}" rx="11.5" fill="none" stroke="__BORDER__"/>
-  <path d="M0 12a12 12 0 0 1 12-12h1176a12 12 0 0 1 12 12v28H0z" fill="__CARD2__"/>
-  <line x1="0" y1="40" x2="1200" y2="40" stroke="__BORDER__"/>
-  <circle cx="26" cy="20" r="5" fill="__BAD__" opacity="0.5"/>
-  <circle cx="44" cy="20" r="5" fill="__WARN__" opacity="0.5"/>
-  <circle cx="62" cy="20" r="5" fill="__GOOD__" opacity="0.5"/>
-  <text x="600" y="25" text-anchor="middle" font-family="__MONO__" font-size="15" font-weight="700"
-        letter-spacing="1.2" fill="__MUTED__">COMPANION REPOS</text>
-{''.join(rows)}
-</svg>
-"""
-
-
-# --------------------------------------------------------------------------- #
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -574,10 +510,6 @@ def main() -> None:
         if "name" not in s:
             sys.exit("error: every card strip needs a name")
         dual_jobs.append((s["name"], cards(s, facts)))
-    for m in spec.get("manifests", []):
-        if "name" not in m:
-            sys.exit("error: every manifest needs a name")
-        dual_jobs.append((m["name"], manifest(m, facts)))
     if "cta" in spec:
         dual_jobs.append((spec["cta"].get("name", "cta"), cta(spec["cta"], facts)))
 

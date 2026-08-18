@@ -27,19 +27,5 @@
       "body": "A MERGE that skips rows where nothing actually changed, and native COLLATE on a column so case-insensitive filters stop wrapping every row in UPPER(). Opt in per model, nothing changes for models that do not.",
       "accent": "violet"
     }
-  ],
-
-  "_manifest_comment": "A styled directory listing, not a captured command - see the note in manifest() in build_readme_assets.py.",
-  "manifests": [
-    {
-      "name": "manifest",
-      "label": "Companion repos - dbt-bigquery-cost-observability-template and dbt-custom-macros",
-      "rows": [
-        { "type": "model", "name": "dbt-bigquery-cost-observability-template",
-          "desc": "runnable cost-observability reference project", "colour": "primary" },
-        { "type": "macro", "name": "dbt-custom-macros",
-          "desc": "two adapter overrides for gaps dbt has no config flag for", "colour": "violet" }
-      ]
-    }
   ]
 }
