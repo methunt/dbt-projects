@@ -16,6 +16,11 @@ Two dbt projects for BigQuery, both about the same thing: **not paying for work 
 
 Each project lives in its own repo now — this page is the index. Click through for the full README, source, and history of each.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/manifest-dark.svg">
+  <img alt="Companion repos: model dbt-bigquery-cost-observability-template, the runnable cost-observability reference project; macro dbt-custom-macros, two adapter overrides for gaps dbt has no config flag for." src="assets/manifest-light.svg">
+</picture>
+
 | | | |
 |---|---|---|
 | 🧱 | **[dbt Template for BigQuery Cost Observability](#-template)** | A runnable dbt project with contracts, incremental merges, a snapshot and a custom materialization. **Runs on seeds** — needs a BigQuery project, no source tables. |
@@ -61,21 +66,8 @@ Run an incremental `merge` model daily and dbt's generated `MERGE` rewrites **ev
 
 ---
 
-## 📚 Reference
-
-Everything below is reference — read it when you need it.
-
-### 📁 Repo index
-
-This repo is the index only — each project moved to its own repo.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/manifest-dark.svg">
-  <img alt="Companion repos: model dbt-bigquery-cost-observability-template, the runnable cost-observability reference project; macro dbt-custom-macros, two adapter overrides for gaps dbt has no config flag for." src="assets/manifest-light.svg">
-</picture>
-
 This repo (`dbt-projects`) keeps only `scripts/` and `assets/` for generating this page's hero/section images.
 
-### 📄 Licence
+## Licence
 
 [MIT](LICENSE). The seed data is fabricated: no production data, table names or addresses appear anywhere in this repository.
