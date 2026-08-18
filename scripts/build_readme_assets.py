@@ -78,9 +78,13 @@ def esc(s: str) -> str:
 
 
 def esc_attr(s: str) -> str:
-    """Escape for an attribute value. Text escaping is not enough: a command
-    line quoted for the shell carries double quotes, and one of those closes the
-    attribute early and makes GitHub render nothing at all."""
+    """Escape for an attribute value, not text content.
+
+    esc() is not enough here. A double quote inside an attribute closes it
+    early, the SVG stops being well-formed, and GitHub renders a malformed SVG
+    as nothing at all - blank space, no error. Titles with quoted phrases and
+    any command line carrying shell quotes both hit this.
+    """
     return esc(s).replace('"', "&quot;")
 
 
@@ -142,80 +146,62 @@ def accent(name: str, where: str) -> str:
 # --------------------------------------------------------------------------- #
 
 def hero(spec: dict, facts: dict) -> str:
-    title = esc(fill(spec["title"], facts))
-    subtitle = fill(spec.get("subtitle", ""), facts)  # escaped per line after wrapping
-    tiles_in = spec.get("tiles", [])
-    badges = [esc(fill(b, facts)) for b in spec.get("badges", [])]
+    """The hero banner - eyebrow and subtitle only.
 
-    if len(tiles_in) > 4:
-        sys.exit("error: hero supports at most 4 tiles; more will not fit 1200px")
+    No title, no KPI tiles, and no badge pills. The project name lives as a
+    real `<h1>` in the README, wrapped in the same link as this image, so a
+    search engine and a screen reader both get the name as text rather than
+    pixels inside an `<img>`. `spec["title"]` is required anyway, but only to
+    drive `aria-label` and the paste-this-heading instructions main() prints -
+    it is never drawn. KPI tiles are gone for the same reason "the three
+    problems it solves" table stopped repeating the money-goes card strip:
+    four numbers with no axis to compare them against read as decoration, not
+    evidence - put real figures in a `strips` card instead. Badge pills are
+    gone because the skeleton already has a badge row directly under the hero
+    (see structure.md) - a stack/language/status badge repeated a few lines
+    apart, once as SVG pixels and once as a shields.io image, said the same
+    thing twice for no reason.
+    """
+    if "title" not in spec:
+        sys.exit(f"error: hero {spec.get('name', 'hero')!r} needs a title, "
+                  f"even though it isn't drawn - it drives aria-label and the "
+                  f"<h1> this asset expects the README to carry above it")
+    eyebrow = esc(fill(spec.get("eyebrow", ""), facts))
+    subtitle = fill(spec.get("subtitle", ""), facts)
+    note = esc(fill(spec.get("note", ""), facts))
+    col = accent(spec.get("accent", "primary"), "hero")
 
-    # Everything below the rule is positioned off the subtitle's line count, so a
-    # long subtitle grows the canvas instead of colliding with the tile row.
-    # See the note in banner(): drawn at 1200, read at ~900, so every size here
-    # arrives a third smaller than it looks in the source.
-    sub_lines = wrap(subtitle, 112) if subtitle else []
-    rule_y = 116 if sub_lines else 112
-    last_text_y = (148 + (len(sub_lines) - 1) * 28) if sub_lines else rule_y
-    tiles_y = last_text_y + 30
-    badge_y = (tiles_y + 122) if tiles_in else tiles_y
-    height = (badge_y + 54) if badges else (tiles_y + 124)
-
-    # Tiles share the row evenly so 2, 3 or 4 all look deliberate.
-    tiles = []
-    if tiles_in:
-        gap, left, right = 16, 40, 40
-        total = 1200 - left - right - gap * (len(tiles_in) - 1)
-        w = total // len(tiles_in)
-        x = left
-        # A tile's label is one line and is not wrapped or ellipsised, so an
-        # over-long one runs out of its card and, in the last tile, off the
-        # canvas - silently, in a file nobody opens. Fail here instead: the
-        # narrower the row gets, the shorter the labels have to be, and that is
-        # a spec problem to fix rather than an asset to ship broken.
-        budget = int((w - 44) / 8.3)
-        for i, t in enumerate(tiles_in):
-            col = accent(t.get("colour", "primary"), f"hero tile {i + 1}")
-            value = esc(fill(t["value"], facts))
-            label = esc(fill(t.get("label", ""), facts))
-            raw = fill(t.get("label", ""), facts)
-            if len(raw) > budget:
-                sys.exit(
-                    f"error: hero tile {i + 1} label is {len(raw)} characters and "
-                    f"only {budget} fit in a {len(tiles_in)}-tile row: {raw!r}"
-                )
-            tiles.append(f"""
-  <g class="rise" style="animation-delay:{0.35 + i * 0.11:.2f}s">
-    <rect x="{x}" y="{tiles_y}" width="{w}" height="100" rx="10" fill="__CARD__" stroke="__BORDER__"/>
-    <rect x="{x}" y="{tiles_y}" width="4" height="100" rx="2" fill="{col}"/>
-    <text x="{x + 22}" y="{tiles_y + 50}" font-family="__FONT__" font-size="35" font-weight="700"
-          fill="__TEXT__" letter-spacing="-0.5">{value}</text>
-    <text x="{x + 22}" y="{tiles_y + 78}" font-family="__FONT__" font-size="16.5"
-          fill="__MUTED__">{label}</text>
-  </g>""")
-            x += w + gap
-
-    bx = 40
-    badge_svg = []
-    for i, b in enumerate(badges):
-        bw = 24 + len(b) * 8.4
-        badge_svg.append(f"""
-  <g class="rise" style="animation-delay:{0.85 + i * 0.07:.2f}s">
-    <rect x="{bx:.0f}" y="{badge_y}" width="{bw:.0f}" height="32" rx="16"
-          fill="__CARD2__" stroke="__BORDER__"/>
-    <text x="{bx + bw / 2:.0f}" y="{badge_y + 21}" text-anchor="middle"
-          font-family="__FONT__" font-size="15.5" fill="__MUTED__">{b}</text>
-  </g>""")
-        bx += bw + 10
-
-    sub = ""
+    # Every row is positioned off the one above it, so an eyebrow-less hero or
+    # a one-line subtitle still gets a canvas sized to what is actually on it -
+    # not to a slot for text that isn't there.
+    eyebrow_y = 74
+    rule_y = (eyebrow_y + 34) if eyebrow else 50
+    sub_lines = wrap(subtitle, 108) if subtitle else []
+    sub_step = 34
+    y = rule_y
+    sub_svg = ""
     for i, line in enumerate(sub_lines):
-        sub += (f"""
-  <text class="rise" style="animation-delay:{0.2 + i * 0.05:.2f}s" x="40" y="{148 + i * 28}"
-        font-family="__FONT__" font-size="19.5" fill="__MUTED__">{esc(line)}</text>""")
+        y = rule_y + 38 + i * sub_step
+        sub_svg += f"""
+  <text class="rise" style="animation-delay:{0.2 + i * 0.05:.2f}s" x="40" y="{y}"
+        font-family="__FONT__" font-size="25" fill="__MUTED__">{esc(line)}</text>"""
+    note_svg = ""
+    if note:
+        y += sub_step if sub_lines else 38
+        note_svg = f"""
+  <text class="rise" style="animation-delay:.25s" x="40" y="{y}"
+        font-family="__MONO__" font-size="18" fill="__MUTED__">{note}</text>"""
+
+    height = y + 40
+
+    eyebrow_svg = ""
+    if eyebrow:
+        eyebrow_svg = f"""
+  <text class="rise" x="40" y="{eyebrow_y}" font-family="__FONT__" font-size="22" font-weight="700"
+        letter-spacing="3" fill="{col}">{eyebrow.upper()}</text>"""
 
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}"
-     width="1200" height="{height}" role="img" aria-label="{title}">
+     width="1200" height="{height}" role="img" aria-label="{esc_attr(fill(spec["title"], facts))}">
   <style>
     /* Entrance animations move things but never fade them. A renderer that does
        not run CSS - GitHub's mobile app, an email digest, a PDF export - would
@@ -234,54 +220,59 @@ def hero(spec: dict, facts: dict) -> str:
       <stop offset="100%" stop-color="__GLOW__" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <!-- Deliberately no background rect. GitHub has four surfaces - white,
-       light-high-contrast, dark #0D1117 and dark dimmed #22272E - and any colour
-       painted here is wrong on at least one of them. A transparent canvas is
-       right on all four; the tiles and badges supply the structure a card
-       would have. -->
-  <g class="blob"><circle cx="1010" cy="70" r="240" fill="url(#g)"/></g>
-  <text class="rise" x="40" y="92" font-family="__FONT__" font-size="44" font-weight="800"
-        fill="__TEXT__" letter-spacing="-1">{title}</text>
+  <!-- The panel paints the theme's own card colour rather than staying
+       transparent, so the hero reads as a deliberate surface on all four
+       GitHub backgrounds instead of borrowing whichever one sits behind it. -->
+  <rect width="1200" height="{height}" rx="16" fill="__CARD__"/>
+  <rect x="0.5" y="0.5" width="1199" height="{height - 1}" rx="15.5" fill="none" stroke="__BORDER__"/>
+  <rect width="8" height="{height}" rx="4" fill="{col}"/>
+  <g class="blob"><circle cx="1010" cy="70" r="240" fill="url(#g)"/></g>{eyebrow_svg}
   <rect class="sweep" x="40" y="{rule_y}" width="1120" height="2"
-        rx="1" fill="__BORDER__"/>{sub}{''.join(tiles)}{''.join(badge_svg)}
+        rx="1" fill="__BORDER__"/>{sub_svg}{note_svg}
 </svg>
 """
 
 
 # --------------------------------------------------------------------------- #
-# Section banner
+# Section caption (renders under a real <h2> - see structure.md)
 # --------------------------------------------------------------------------- #
 
-def banner(spec: dict, facts: dict) -> str:
-    eyebrow = esc(fill(spec.get("eyebrow", ""), facts))
-    title = esc(fill(spec["title"], facts))
-    body = fill(spec.get("body", ""), facts)
-    col = accent(spec.get("accent", "primary"), f"banner {spec.get('name')}")
+def caption(spec: dict, facts: dict) -> str:
+    """A caption strip for the sentence under a section's real `<h2>`.
 
+    This used to be called `banner()` and drew the eyebrow and title as SVG
+    text - which meant "Part 2 - dbt on BigQuery" existed on the page only as
+    pixels inside an `<img>`, invisible to search and to a screen reader.
+    `spec["eyebrow"]` and `spec["title"]` are still required, but only to
+    compose `aria-label` and the exact `<h2>` text main() prints for you to
+    paste above the image - see structure.md for where that heading goes.
+    Everything actually drawn here is `spec["body"]`, wrapped, next to an
+    accent bar. Light-only by convention: see svg-assets.md.
+    """
+    if "eyebrow" not in spec or "title" not in spec:
+        sys.exit(f"error: caption {spec.get('name')!r} needs eyebrow and title, "
+                  f"even though neither is drawn - they compose the <h2> text "
+                  f"main() prints for you to paste above this image")
+    body = fill(spec.get("body", ""), facts)
+    col = accent(spec.get("accent", "primary"), f"caption {spec.get('name')}")
     # Sizes are chosen for the RENDERED result, not the source. The canvas is
     # 1200 wide and GitHub's content column is ~900, so everything here is seen
-    # at 0.75x: a 12px source size arrives as 9px, which is why the first pass
-    # of these banners had an eyebrow nobody could read. Divide by 1.33 to see
-    # what the reader gets.
-    lines = wrap(body, 122)
-    body_y0 = 108 if eyebrow else 88
-    body_step = 26
-    height = body_y0 + max(0, len(lines) - 1) * body_step + 30
+    # at 0.75x: a 12px source size arrives as 9px. Divide by 1.33 to see what
+    # the reader actually gets, and keep the result above 11px.
+    lines = wrap(body, 104)
+    first_y, step = 46, 32
+    height = first_y + max(0, len(lines) - 1) * step + 34
 
     body_svg = "".join(f"""
-  <text x="40" y="{body_y0 + i * body_step}" font-family="__FONT__" font-size="17.5"
+  <text x="40" y="{first_y + i * step}" font-family="__FONT__" font-size="22"
         fill="__MUTED__">{esc(line)}</text>""" for i, line in enumerate(lines))
 
-    eyebrow_svg = ""
-    if eyebrow:
-        eyebrow_svg = f"""
-  <text x="40" y="42" font-family="__MONO__" font-size="17" font-weight="700"
-        letter-spacing="1.6" fill="{col}">{eyebrow.upper()}</text>"""
+    label = esc_attr(f"{fill(spec['eyebrow'], facts)} - {fill(spec['title'], facts)}")
 
     # The wash is a tint of the accent, not a solid fill: a solid band fights the
     # page on every one of GitHub's four surfaces.
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}"
-     width="1200" height="{height}" role="img" aria-label="{title}">
+     width="1200" height="{height}" role="img" aria-label="{label}">
   <style>{MOTION}</style>
   <defs>
     <linearGradient id="w" x1="0" y1="0" x2="1" y2="0">
@@ -292,10 +283,62 @@ def banner(spec: dict, facts: dict) -> str:
   <rect width="1200" height="{height}" rx="12" fill="__CARD__"/>
   <rect width="1200" height="{height}" rx="12" fill="url(#w)"/>
   <rect width="6" height="{height}" rx="3" fill="{col}"/>
-  <g class="rise">{eyebrow_svg}
-  <text x="40" y="{78 if eyebrow else 56}" font-family="__FONT__" font-size="29"
-        font-weight="700" fill="__TEXT__" letter-spacing="-0.4">{title}</text>{body_svg}
+  <g class="rise">{body_svg}
   </g>
+</svg>
+"""
+
+
+# --------------------------------------------------------------------------- #
+# Card strip - 2 or 3 cards side by side, e.g. a "why this matters" banner
+# --------------------------------------------------------------------------- #
+
+def cards(spec: dict, facts: dict) -> str:
+    """A row of 2-3 stat cards - the business-case banner, not a heading.
+
+    Unlike hero() and caption(), this one is not standing in for a heading, so
+    it keeps its own icon/title/stat baked into the SVG - there is no `<h2>`
+    for it to duplicate. Use it for the "why does this matter" or "where does
+    this help" banner the reader wants right after the pitch, each stat pulled
+    from `facts` so it cannot drift from what the project's own data shows.
+    """
+    items = spec.get("cards", [])
+    if not (2 <= len(items) <= 3):
+        sys.exit(f"error: card strip {spec.get('name')!r} holds 2 or 3 cards; "
+                  f"more will not fit 1200px")
+
+    gap = 20
+    w = (1200 - gap * (len(items) - 1)) // len(items)
+    wrapped = [wrap(fill(c.get("body", ""), facts), 36) for c in items]
+    body_y0, body_step = 158, 31
+    height = body_y0 + max(len(b) for b in wrapped) * body_step + 56
+
+    out = []
+    for i, (c, body) in enumerate(zip(items, wrapped)):
+        col = accent(c.get("colour", "primary"), f"card {i + 1}")
+        x = i * (w + gap)
+        lines = "".join(f"""
+    <text x="{x + 28}" y="{body_y0 + j * body_step}" font-family="__FONT__" font-size="21"
+          fill="__MUTED__">{esc(line)}</text>""" for j, line in enumerate(body))
+        foot_y = height - 32
+        out.append(f"""
+  <g class="rise" style="animation-delay:{0.15 + i * 0.12:.2f}s">
+    <rect x="{x}" y="0" width="{w}" height="{height}" rx="14" fill="__CARD__" stroke="__BORDER__"/>
+    <rect x="{x}" y="0" width="{w}" height="5" rx="2.5" fill="{col}"/>
+    <circle cx="{x + 52}" cy="64" r="28" fill="{col}" fill-opacity="0.14"/>
+    <text x="{x + 52}" y="75" text-anchor="middle" font-family="__FONT__"
+          font-size="29">{esc(c.get("icon", ""))}</text>
+    <text x="{x + 28}" y="124" font-family="__FONT__" font-size="26" font-weight="700"
+          fill="__TEXT__" letter-spacing="-0.4">{esc(fill(c.get("title", ""), facts))}</text>{lines}
+    <rect x="{x + 28}" y="{foot_y - 23}" width="{w - 56}" height="1" fill="__BORDER__"/>
+    <text x="{x + 28}" y="{foot_y}" font-family="__FONT__" font-size="19.5" font-weight="700"
+          fill="{col}" letter-spacing="0.3">{esc(fill(c.get("stat", ""), facts))}</text>
+  </g>""")
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}"
+     width="1200" height="{height}" role="img" aria-label="{esc_attr(spec.get('label', 'Feature strip'))}">
+  <style>{MOTION}</style>
+{''.join(out)}
 </svg>
 """
 
@@ -313,7 +356,7 @@ def cta(spec: dict, facts: dict) -> str:
     # resolution. It paints no page background - only the pill - so it sits
     # cleanly on all four GitHub surfaces including dark dimmed (#22272E).
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 152"
-     width="1320" height="152" role="img" aria-label="{label}">
+     width="1320" height="152" role="img" aria-label="{esc_attr(fill(spec["label"], facts))}">
   <style>{MOTION}
     .sheen {{ animation: sheen 4.5s ease-in-out infinite 1.4s; }}
     @keyframes sheen {{ from {{ transform: translateX(-200px) }}
@@ -428,6 +471,70 @@ def cast(spec: dict, facts: dict) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# Companion-repo manifest - a styled directory listing, NOT a captured
+# command. Bespoke to this repo (a repo-index hub, not a runnable project),
+# so it lives here rather than in the shared skill script.
+# --------------------------------------------------------------------------- #
+
+def manifest(spec: dict, facts: dict) -> str:
+    """A dbt-flavoured directory listing of the companion repos.
+
+    Deliberately NOT built on cast() and deliberately carries no `$ command`
+    prompt line: cast() exists for a real captured run, and dressing a
+    fabricated `dbt list` invocation up as terminal output would be exactly
+    the mock-up-as-evidence the skill's cast() rule forbids. This is honestly
+    labelled as what it is - a styled index - monospace and dbt-flavoured
+    because the subject is a CLI tool, not because it pretends to be one.
+    """
+    rows_in = spec.get("rows", [])
+    if not rows_in:
+        sys.exit(f"error: manifest {spec.get('name')!r} has no rows")
+
+    pad, row_h = 30, 60
+    top = 76
+    height = top + len(rows_in) * row_h + 22
+
+    type_w = 92
+    rows = []
+    for i, r in enumerate(rows_in):
+        col = accent(r.get("colour", "primary"), f"manifest row {i + 1}")
+        y = top + i * row_h
+        rtype = esc(fill(r["type"], facts))
+        name = esc(fill(r["name"], facts))
+        desc = esc(fill(r.get("desc", ""), facts))
+        rows.append(f"""
+  <g class="ln" style="animation-delay:{min(0.06 * i, 0.6):.2f}s">
+    <rect x="{pad}" y="{y}" width="{type_w}" height="26" rx="4" fill="{col}" fill-opacity="0.14"/>
+    <text x="{pad + type_w / 2:.0f}" y="{y + 18}" text-anchor="middle" font-family="__MONO__"
+          font-size="16" font-weight="700" fill="{col}">{rtype}</text>
+    <text x="{pad + type_w + 18}" y="{y + 18}" font-family="__MONO__" font-size="17"
+          font-weight="700" fill="__TEXT__">{name}</text>
+    <text x="{pad + type_w + 18}" y="{y + 40}" font-family="__FONT__" font-size="15.5"
+          fill="__MUTED__">{desc}</text>
+  </g>""")
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}"
+     width="1200" height="{height}" role="img" aria-label="{esc_attr(spec.get('label', 'Companion repos'))}">
+  <style>
+    .ln {{ animation: rise .45s cubic-bezier(.2,.7,.3,1) both; }}
+    @keyframes rise {{ from {{ transform: translateY(8px) }} to {{ transform: translateY(0) }} }}
+    @media (prefers-reduced-motion: reduce) {{ .ln {{ animation: none }} }}
+  </style>
+  <rect width="1200" height="{height}" rx="12" fill="__CARD__"/>
+  <rect x="0.5" y="0.5" width="1199" height="{height - 1}" rx="11.5" fill="none" stroke="__BORDER__"/>
+  <path d="M0 12a12 12 0 0 1 12-12h1176a12 12 0 0 1 12 12v28H0z" fill="__CARD2__"/>
+  <line x1="0" y1="40" x2="1200" y2="40" stroke="__BORDER__"/>
+  <circle cx="26" cy="20" r="5" fill="__BAD__" opacity="0.5"/>
+  <circle cx="44" cy="20" r="5" fill="__WARN__" opacity="0.5"/>
+  <circle cx="62" cy="20" r="5" fill="__GOOD__" opacity="0.5"/>
+  <text x="600" y="25" text-anchor="middle" font-family="__MONO__" font-size="15" font-weight="700"
+        letter-spacing="1.2" fill="__MUTED__">COMPANION REPOS</text>
+{''.join(rows)}
+</svg>
+"""
+
+
+# --------------------------------------------------------------------------- #
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -454,29 +561,46 @@ def main() -> None:
     out = Path(args.out) if args.out else root / spec.get("out_dir", "assets")
     out.mkdir(parents=True, exist_ok=True)
 
-    jobs: list[tuple[str, str]] = []
+    # Dual-theme jobs: hero, cta, casts, cards. Each gets a light and a dark
+    # file, and the README picks between them with <picture>.
+    dual_jobs: list[tuple[str, str]] = []
     if "hero" in spec:
-        jobs.append((spec["hero"].get("name", "hero"), hero(spec["hero"], facts)))
-    for b in spec.get("banners", []):
-        if "name" not in b:
-            sys.exit("error: every banner needs a name")
-        jobs.append((b["name"], banner(b, facts)))
+        dual_jobs.append((spec["hero"].get("name", "hero"), hero(spec["hero"], facts)))
     for c in spec.get("casts", []):
         if "name" not in c:
             sys.exit("error: every cast needs a name")
-        jobs.append((c["name"], cast(c, facts)))
+        dual_jobs.append((c["name"], cast(c, facts)))
+    for s in spec.get("strips", []):
+        if "name" not in s:
+            sys.exit("error: every card strip needs a name")
+        dual_jobs.append((s["name"], cards(s, facts)))
+    for m in spec.get("manifests", []):
+        if "name" not in m:
+            sys.exit("error: every manifest needs a name")
+        dual_jobs.append((m["name"], manifest(m, facts)))
     if "cta" in spec:
-        jobs.append((spec["cta"].get("name", "cta"), cta(spec["cta"], facts)))
+        dual_jobs.append((spec["cta"].get("name", "cta"), cta(spec["cta"], facts)))
 
-    if not jobs:
-        sys.exit("error: spec produced nothing - expected hero, banners, casts or cta")
+    # Light-only: the section captions that sit under a real <h2>. There is no
+    # title baked into them to go illegible on a dark background, and shipping
+    # one file instead of two is one fewer thing to keep in sync. See
+    # svg-assets.md on why this is the standard for anything that stands in
+    # for a heading, and dual_jobs above for anything that doesn't.
+    caption_jobs: list[tuple[str, dict]] = []
+    for b in spec.get("banners", []):
+        if "name" not in b:
+            sys.exit("error: every banner needs a name")
+        caption_jobs.append((b["name"], b))
+
+    if not dual_jobs and not caption_jobs:
+        sys.exit("error: spec produced nothing - expected hero, banners, casts, strips or cta")
 
     overrides = spec.get("palette", {})
     written = 0
     for palette in (LIGHT, DARK):
         p = dict(palette)
         p.update({k.lower(): v for k, v in overrides.get(palette["name"], {}).items()})
-        for name, template in jobs:
+        for name, template in dual_jobs:
             path = out / f"{name}-{palette['name']}.svg"
             # write_text with an explicit encoding, never PowerShell redirection:
             # a UTF-8 BOM in an SVG makes some renderers reject the file.
@@ -484,14 +608,50 @@ def main() -> None:
             written += 1
             print(f"  {path.relative_to(root) if root in path.parents else path}")
 
+    light = dict(LIGHT)
+    light.update({k.lower(): v for k, v in overrides.get("light", {}).items()})
+    for name, b in caption_jobs:
+        path = out / f"{name}-light.svg"
+        path.write_text(paint(caption(b, facts), light), encoding="utf-8")
+        written += 1
+        print(f"  {path.relative_to(root) if root in path.parents else path}  (light-only)")
+        stale_dark = out / f"{name}-dark.svg"
+        if stale_dark.exists():
+            stale_dark.unlink()
+            print(f"  removed {stale_dark.relative_to(root)}  (light-only now)")
+
     print(f"{written} files written to {out}")
-    print("\nReference each pair in the README as:\n")
-    for name, _ in jobs:
-        print(f'<picture>\n'
-              f'  <source media="(prefers-color-scheme: dark)" '
-              f'srcset="{out.name}/{name}-dark.svg">\n'
+
+    print("\nHero - paste the <h1> above the <picture>, both inside the same link:\n")
+    if "hero" in spec:
+        name = spec["hero"].get("name", "hero")
+        # Plain fill(), not esc() - this prints as literal markdown/HTML source
+        # for the user to paste, not as text going inside an XML attribute.
+        title = fill(spec["hero"]["title"], facts)
+        print(f'<h1>{title}</h1>\n'
+              f'<picture>\n'
+              f'  <source media="(prefers-color-scheme: dark)" srcset="{out.name}/{name}-dark.svg">\n'
               f'  <img alt="DESCRIBE THE CONTENT" src="{out.name}/{name}-light.svg">\n'
               f'</picture>\n')
+
+    if caption_jobs:
+        print("Section captions - paste the anchor and <h2> above each light-only image:\n")
+        for name, b in caption_jobs:
+            title = fill(b["title"], facts)
+            print(f'<a id="-{name}"></a>\n\n'
+                  f'## {title}\n\n'
+                  f'<img alt="DESCRIBE THE CONTENT" src="{out.name}/{name}-light.svg">\n')
+
+    other = [(n, t) for n, t in dual_jobs
+             if "hero" not in spec or n != spec["hero"].get("name", "hero")]
+    if other:
+        print("Everything else - dual-theme, reference with <picture>:\n")
+        for name, _ in other:
+            print(f'<picture>\n'
+                  f'  <source media="(prefers-color-scheme: dark)" '
+                  f'srcset="{out.name}/{name}-dark.svg">\n'
+                  f'  <img alt="DESCRIBE THE CONTENT" src="{out.name}/{name}-light.svg">\n'
+                  f'</picture>\n')
 
 
 if __name__ == "__main__":

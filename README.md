@@ -1,3 +1,4 @@
+<h1>dbt on BigQuery, and what it costs to run</h1>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
   <img alt="dbt on BigQuery, and what it costs to run — a runnable reference project built to be measured, and two adapter overrides for gaps dbt has no config flag for." src="assets/hero-light.svg">
@@ -23,10 +24,10 @@ Each project lives in its own repo now — this page is the index. Click through
 ---
 
 <a id="-template"></a>
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/section-template-dark.svg">
-  <img alt="Project 1 — dbt Template for BigQuery Cost Observability. A dbt project with contracts, incremental merges, a snapshot and a custom materialization, built small enough to run on seeds so the companion Power BI report has something real to observe." src="assets/section-template-light.svg">
-</picture>
+
+## Project 1 — dbt Template for BigQuery Cost Observability
+
+<img alt="A dbt project with contracts, incremental merges, a snapshot and a custom materialization, built small enough to run on seeds so the companion Power BI report has something real to observe." src="assets/section-template-light.svg">
 
 A cost dashboard is only as interesting as the dbt project underneath it. This one exists to give it something worth graphing — deliberately small, but with the patterns that actually behave differently on a run: a snapshot, an incremental fact that repairs itself, a custom materialization, enforced contracts.
 
@@ -43,10 +44,10 @@ It's the other half of **[BigQuery + dbt Cost Observability](https://github.com/
 ---
 
 <a id="-macros"></a>
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/section-macros-dark.svg">
-  <img alt="Project 2 — dbt Custom Macros for BigQuery. A MERGE that skips rows where nothing actually changed, and native COLLATE on a column so case-insensitive filters stop wrapping every row in UPPER(). Opt in per model." src="assets/section-macros-light.svg">
-</picture>
+
+## Project 2 — dbt Custom Macros for BigQuery
+
+<img alt="A MERGE that skips rows where nothing actually changed, and native COLLATE on a column so case-insensitive filters stop wrapping every row in UPPER(). Opt in per model." src="assets/section-macros-light.svg">
 
 Run an incremental `merge` model daily and dbt's generated `MERGE` rewrites **every matched row on every run**, including the ones where nothing changed. Separately, filtering a text column case-insensitively means wrapping every row in `UPPER()` before BigQuery can use the value. Both are gaps in dbt, not model-design mistakes — and neither has a supported config flag. These two macros override the exact point where the SQL is generated.
 
@@ -66,12 +67,12 @@ Everything below is reference — read it when you need it.
 
 ### 📁 Repo index
 
-This repo is the index only — each project moved to its own repo, listed below.
+This repo is the index only — each project moved to its own repo.
 
-| Repo | Contents |
-|---|---|
-| [dbt-bigquery-cost-observability-template](https://github.com/methunt/dbt-bigquery-cost-observability-template) | models, macros, seeds, snapshots, tests, architecture.md |
-| [dbt-custom-macros](https://github.com/methunt/dbt-custom-macros) | two standalone adapter overrides |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/manifest-dark.svg">
+  <img alt="Companion repos: model dbt-bigquery-cost-observability-template, the runnable cost-observability reference project; macro dbt-custom-macros, two adapter overrides for gaps dbt has no config flag for." src="assets/manifest-light.svg">
+</picture>
 
 This repo (`dbt-projects`) keeps only `scripts/` and `assets/` for generating this page's hero/section images.
 
